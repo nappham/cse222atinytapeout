@@ -3,12 +3,11 @@ from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, Timer
 
 def set_inputs(dut, a, b, op):
-    """Helper: pack a (4-bit), b (4-bit) into ui_in, op into uio_in"""
     dut.ui_in.value  = ((a & 0xF) << 4) | (b & 0xF)
     dut.uio_in.value = op & 0x7
 
 async def wait_and_check(dut, expected, op_name):
-    await Timer(20, units="ns")
+    await Timer(20, unit="ns")
     got = int(dut.uo_out.value)
     assert got == expected, f"{op_name} FAILED: got {got}, expected {expected}"
     dut._log.info(f"{op_name} PASSED: got {got}")
@@ -17,19 +16,19 @@ async def wait_and_check(dut, expected, op_name):
 async def test_alu(dut):
     dut._log.info("Starting ALU tests")
 
-    # Start clock
-    clock = Clock(dut.clk, 10, units="ns")
+    clock = Clock(dut.clk, 10, unit="ns")
     cocotb.start_soon(clock.start())
 
-    # Reset
+    # Reset - hold for longer to be safe
     dut.ena.value    = 1
     dut.rst_n.value  = 0
     dut.ui_in.value  = 0
     dut.uio_in.value = 0
-    await RisingEdge(dut.clk)
-    await RisingEdge(dut.clk)
-    dut.rst_n.value  = 1
-    await RisingEdge(dut.clk)
+    for _ in range(5):
+        await RisingEdge(dut.clk)
+    dut.rst_n.value = 1
+    for _ in range(3):
+        await RisingEdge(dut.clk)
 
     # ADD: 3 + 2 = 5
     set_inputs(dut, a=3, b=2, op=0b000)
@@ -51,7 +50,7 @@ async def test_alu(dut):
     set_inputs(dut, a=6, b=3, op=0b100)
     await wait_and_check(dut, 5, "XOR 6^3")
 
-    # NOT: ~6 on 4 bits = ~0110 = 1001 = 9
+    # NOT: ~6 = 1001 = 9 (4-bit)
     set_inputs(dut, a=6, b=0, op=0b101)
     await wait_and_check(dut, 9, "NOT ~6")
 
