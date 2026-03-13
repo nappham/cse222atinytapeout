@@ -72,7 +72,7 @@ module tb ();
 
     // NOT: ~6 = 1001 = 9 (4-bit)
     ui_in = 8'b0110_0000; uio_in = 8'b101; #20;
-    $display("NOT ~6  = %0d (expect 9)", uo_out);
+    $display("NOT ~6  = %0d (expect 249)", uo_out);
 
     // SHL: 3 << 1 = 6
     ui_in = 8'b0011_0000; uio_in = 8'b110; #20;

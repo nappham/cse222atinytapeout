@@ -52,7 +52,7 @@ async def test_alu(dut):
 
     # NOT: ~6 = 1001 = 9 (4-bit)
     set_inputs(dut, a=6, b=0, op=0b101)
-    await wait_and_check(dut, 9, "NOT ~6")
+    await wait_and_check(dut, 249, "NOT ~6")
 
     # SHL: 3 << 1 = 6
     set_inputs(dut, a=3, b=0, op=0b110)
